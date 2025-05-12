@@ -133,6 +133,8 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
 
     public static boolean debug = false;
 
+    public static String prefix = "[ICDiscordSrvAddon] ";
+
     protected final ReentrantLock resourceReloadLock = new ReentrantLock(true);
     public Metrics metrics;
     public AtomicLong messagesCounter = new AtomicLong(0);
@@ -343,7 +345,7 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                 try {
                     Files.move(resources.toPath(), resourcepacks.toPath(), StandardCopyOption.ATOMIC_MOVE);
                 } catch (IOException e) {
-                    getServer().getConsoleSender().sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to move folder, are any files opened?");
+                    sendMessageError("Unable to move folder, are any files opened?");
                     e.printStackTrace();
                     getServer().getPluginManager().disablePlugin(this);
                     return;
@@ -358,18 +360,18 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
         }
 
         if (InteractiveChat.isPluginEnabled("ItemsAdder")) {
-            getServer().getConsoleSender().sendMessage(org.bukkit.ChatColor.AQUA + "[ICDiscordSrvAddon] InteractiveChat DiscordSRV Addon has hooked into ItemsAdder!");
+            sendMessageAqua("InteractiveChat DiscordSRV Addon has hooked into ItemsAdder!");
             itemsAdderHook = true;
         }
 
         if (!compatible()) {
             for (int i = 0; i < 10; i++) {
-                getServer().getConsoleSender().sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] VERSION NOT COMPATIBLE WITH INSTALLED INTERACTIVECHAT VERSION, PLEASE UPDATE BOTH TO LATEST!!!!");
+                sendMessageError("VERSION NOT COMPATIBLE WITH INSTALLED INTERACTIVECHAT VERSION, PLEASE UPDATE BOTH TO LATEST!!!!");
             }
             getServer().getPluginManager().disablePlugin(this);
             return;
         } else {
-            getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[ICDiscordSrvAddon] InteractiveChat DiscordSRV Addon has been Enabled!");
+            sendMessageGreen("InteractiveChat DiscordSRV Addon has been Enabled!");
         }
 
         reloadTextures(false, false);
@@ -433,7 +435,7 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
         if (resourceManager != null) {
             resourceManager.close();
         }
-        getServer().getConsoleSender().sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] InteractiveChat DiscordSRV Addon has been Disabled!");
+        sendMessageError("InteractiveChat DiscordSRV Addon has been Disabled!");
     }
 
     public boolean compatible() {
@@ -680,7 +682,7 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                 File serverResourcePackFolder = new File(getDataFolder(), "server-resource-packs");
                 File serverResourcePack = null;
                 if (includeServerResourcePack) {
-                    Bukkit.getConsoleSender().sendMessage(ChatColor.GRAY + "[ICDiscordSrvAddon] Checking for server resource pack...");
+                    sendMessageGray("Checking for server resource pack...");
                     ServerResourcePackDownloadResult result = AssetsDownloader.downloadServerResourcePack(serverResourcePackFolder);
                     serverResourcePack = result.getResourcePackFile();
                     if (result.getError() != null) {
@@ -688,31 +690,31 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                     }
                     switch (result.getType()) {
                         case SUCCESS_NO_CHANGES:
-                            sendMessage(ChatColor.GREEN + "[ICDiscordSrvAddon] Server resource pack found with verification hash: No changes", senders);
+                            sendMessageGreen("Server resource pack found with verification hash: No changes", senders);
                             resourceList.add(serverResourcePack.getName());
                             break;
                         case SUCCESS_WITH_HASH:
-                            sendMessage(ChatColor.GREEN + "[ICDiscordSrvAddon] Server resource pack found with verification hash: Hash changed, downloaded", senders);
+                            sendMessageGreen("Server resource pack found with verification hash: Hash changed, downloaded", senders);
                             resourceList.add(serverResourcePack.getName());
                             break;
                         case SUCCESS_NO_HASH:
-                            sendMessage(ChatColor.GREEN + "[ICDiscordSrvAddon] Server resource pack found without verification hash: Downloaded", senders);
+                            sendMessageGreen("Server resource pack found without verification hash: Downloaded", senders);
                             resourceList.add(serverResourcePack.getName());
                             break;
                         case FAILURE_WRONG_HASH:
-                            sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Server resource pack had wrong hash (expected " + result.getExpectedHash() + ", found " + result.getPackHash() + ")", senders);
-                            sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Server resource pack will not be applied: Hash check failure", senders);
+                            sendMessageError("Server resource pack had wrong hash (expected " + result.getExpectedHash() + ", found " + result.getPackHash() + ")", senders);
+                            sendMessageError("Server resource pack will not be applied: Hash check failure", senders);
                             break;
                         case FAILURE_DOWNLOAD:
-                            sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Failed to download server resource pack", senders);
+                            sendMessageError("Failed to download server resource pack", senders);
                             break;
                         case NO_PACK:
-                            Bukkit.getConsoleSender().sendMessage(ChatColor.GRAY + "[ICDiscordSrvAddon] No server resource pack found");
+                            sendMessageGray("No server resource pack found");
                             break;
                     }
                 }
 
-                sendMessage(ChatColor.AQUA + "[ICDiscordSrvAddon] Reloading ResourceManager: " + ChatColor.YELLOW + String.join(", ", resourceList), senders);
+                sendMessageAqua("Reloading ResourceManager: " + ChatColor.YELLOW + String.join(", ", resourceList), senders);
 
                 List<ModManagerSupplier<?>> mods = new ArrayList<>();
                 if (chimeOverrideModels) {
@@ -742,7 +744,7 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                 );
 
                 for (Entry<String, ModManager> entry : resourceManager.getModManagers().entrySet()) {
-                    Bukkit.getConsoleSender().sendMessage(ChatColor.GRAY + "[ICDiscordSrvAddon] Registered ModManager \"" + entry.getKey() + "\" of class \"" + entry.getValue().getClass().getName() + "\"");
+                    sendMessageGray("Registered ModManager \"" + entry.getKey() + "\" of class \"" + entry.getValue().getClass().getName() + "\"");
                 }
 
                 resourceManager.getFontManager().setDefaultKey(forceUnicode ? FontManager.UNIFORM_FONT : FontManager.DEFAULT_FONT);
@@ -755,51 +757,51 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                     }
                 });
 
-                Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[ICDiscordSrvAddon] Loading \"Default\" resources...");
+                sendMessageAqua("Loading \"Default\" resources...");
                 resourceManager.loadResources(new File(getDataFolder() + "/built-in", "Default"), ResourcePackType.BUILT_IN, true);
                 for (String resourceName : resourceOrder) {
                     try {
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[ICDiscordSrvAddon] Loading \"" + resourceName + "\" resources...");
+                        sendMessageAqua("Loading \"" + resourceName + "\" resources...");
                         File resourcePackFile = new File(getDataFolder(), "resourcepacks/" + resourceName);
                         ResourcePackInfo info = resourceManager.loadResources(resourcePackFile, ResourcePackType.LOCAL);
                         if (info.getStatus()) {
                             if (info.compareServerPackFormat(ResourceRegistry.RESOURCE_PACK_VERSION) > 0) {
-                                sendMessage(ChatColor.YELLOW + "[ICDiscordSrvAddon] Warning: \"" + resourceName + "\" was made for a newer version of Minecraft!", senders);
+                                sendMessageWarn("Warning: \"" + resourceName + "\" was made for a newer version of Minecraft!", senders);
                             } else if (info.compareServerPackFormat(ResourceRegistry.RESOURCE_PACK_VERSION) < 0) {
-                                sendMessage(ChatColor.YELLOW + "[ICDiscordSrvAddon] Warning: \"" + resourceName + "\" was made for an older version of Minecraft!", senders);
+                                sendMessageWarn("Warning: \"" + resourceName + "\" was made for an older version of Minecraft!", senders);
                             }
                         } else {
                             if (info.getRejectedReason() == null) {
-                                sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\"", senders);
+                                sendMessageError("Unable to load \"" + resourceName + "\"", senders);
                             } else {
-                                sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\", Reason: " + info.getRejectedReason(), senders);
+                                sendMessageError("Unable to load \"" + resourceName + "\", Reason: " + info.getRejectedReason(), senders);
                             }
                         }
                     } catch (Exception e) {
-                        sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\"", senders);
+                        sendMessageError("Unable to load \"" + resourceName + "\"", senders);
                         e.printStackTrace();
                     }
                 }
                 if (includeServerResourcePack && serverResourcePack != null && serverResourcePack.exists()) {
                     String resourceName = serverResourcePack.getName();
                     try {
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[ICDiscordSrvAddon] Loading \"" + resourceName + "\" resources...");
+                        sendMessageAqua("Loading \"" + resourceName + "\" resources...");
                         ResourcePackInfo info = resourceManager.loadResources(serverResourcePack, ResourcePackType.SERVER);
                         if (info.getStatus()) {
                             if (info.compareServerPackFormat(ResourceRegistry.RESOURCE_PACK_VERSION) > 0) {
-                                sendMessage(ChatColor.YELLOW + "[ICDiscordSrvAddon] Warning: \"" + resourceName + "\" was made for a newer version of Minecraft!", senders);
+                                sendMessageWarn("Warning: \"" + resourceName + "\" was made for a newer version of Minecraft!", senders);
                             } else if (info.compareServerPackFormat(ResourceRegistry.RESOURCE_PACK_VERSION) < 0) {
-                                sendMessage(ChatColor.YELLOW + "[ICDiscordSrvAddon] Warning: \"" + resourceName + "\" was made for an older version of Minecraft!", senders);
+                                sendMessageWarn("Warning: \"" + resourceName + "\" was made for an older version of Minecraft!", senders);
                             }
                         } else {
                             if (info.getRejectedReason() == null) {
-                                sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\"", senders);
+                                sendMessageError("Unable to load \"" + resourceName + "\"", senders);
                             } else {
-                                sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\", Reason: " + info.getRejectedReason(), senders);
+                                sendMessageError("Unable to load \"" + resourceName + "\", Reason: " + info.getRejectedReason(), senders);
                             }
                         }
                     } catch (Exception e) {
-                        sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] Unable to load \"" + resourceName + "\"", senders);
+                        sendMessageError("Unable to load \"" + resourceName + "\"", senders);
                         e.printStackTrace();
                     }
                 }
@@ -808,10 +810,10 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
                     InteractiveChatDiscordSrvAddon.plugin.resourceManager = resourceManager;
 
                     if (resourceManager.getResourcePackInfo().stream().allMatch(each -> each.getStatus())) {
-                        sendMessage(ChatColor.AQUA + "[ICDiscordSrvAddon] Loaded all resources!", senders);
+                        sendMessageAqua("Loaded all resources!", senders);
                         isReady = true;
                     } else {
-                        sendMessage(ChatColor.RED + "[ICDiscordSrvAddon] There is a problem while loading resources.", senders);
+                        sendMessageError("There is a problem while loading resources.", senders);
                     }
                     return null;
                 }).get();
@@ -823,10 +825,27 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
         });
     }
 
+    public void sendMessage(ChatColor color, String message, CommandSender... senders) {
+        if (senders.length == 0) { Bukkit.getConsoleSender().sendMessage(color + prefix + message); return; }
+        for (CommandSender sender : senders) { sender.sendMessage(color + prefix + message); }
+    }
     public void sendMessage(String message, CommandSender... senders) {
-        for (CommandSender sender : senders) {
-            sender.sendMessage(message);
-        }
+        sendMessage(ChatColor.RESET, message, senders);
     }
 
+    public void sendMessageError(String message, CommandSender... senders) {
+        sendMessage(ChatColor.RED, message, senders);
+    }
+    public void sendMessageWarn(String message, CommandSender... senders) {
+        sendMessage(ChatColor.YELLOW, message, senders);
+    }
+    public void sendMessageGreen(String message, CommandSender... senders) {
+        sendMessage(ChatColor.GREEN, message, senders);
+    }
+    public void sendMessageGray(String message, CommandSender... senders) {
+        sendMessage(ChatColor.GRAY, message, senders);
+    }
+    public void sendMessageAqua(String message, CommandSender... senders) {
+        sendMessage(ChatColor.AQUA, message, senders);
+    }
 }
