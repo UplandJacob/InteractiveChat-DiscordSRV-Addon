@@ -826,7 +826,7 @@ public class InteractiveChatDiscordSrvAddon extends JavaPlugin implements Listen
     }
 
     public void sendMessage(ChatColor color, String message, CommandSender... senders) {
-        if (senders.length == 0) { Bukkit.getConsoleSender().sendMessage(color + prefix + message); return; }
+        if (senders.length == 0) { sendMessage(color, message, Bukkit.getConsoleSender()); return; }
         for (CommandSender sender : senders) { sender.sendMessage(color + prefix + message); }
     }
     public void sendMessage(String message, CommandSender... senders) {
